@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>⚡ SVS Prep Guide ⚡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Baloo+2:wght@500;700;800&family=Noto+Sans+KR:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#19102e;
+    --night2:#241540;
+    --card:#2c1a4d;
+    --pika:#ffcb05;
+    --pika-dark:#f0a800;
+    --cheek:#ff5b3c;
+    --spark:#7fe9ff;
+    --cream:#fff6e0;
+    --ok:#5ee37b;
+    --meh:#ffd166;
+    --skip:#7a6a96;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background: radial-gradient(circle at 20% 0%, #2e1c54 0%, var(--night) 55%, #100a1f 100%);
+    color:var(--cream);
+    font-family:'Baloo 2','Noto Sans KR', sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    padding-bottom:40px;
+  }
+  .pixel{font-family:'Press Start 2P', monospace;}
+
+  /* ---------- floating sparks background ---------- */
+  .sparks{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;}
+  .sparks span{
+    position:absolute; bottom:-40px; font-size:18px; opacity:.35;
+    animation: rise linear infinite;
+  }
+  @keyframes rise{
+    to{ transform:translateY(-110vh) rotate(360deg); opacity:0; }
+  }
+
+  /* ---------- language switcher ---------- */
+  .lang-switch{
+    position:fixed; top:12px; right:12px; z-index:5;
+    display:flex; gap:4px; background:var(--card); border:2px solid var(--pika);
+    border-radius:20px; padding:4px; box-shadow:0 0 12px rgba(255,203,5,.3);
+  }
+  .lang-switch button{
+    border:none; background:transparent; color:var(--cream); font-weight:800;
+    font-size:12px; padding:6px 12px; border-radius:16px; cursor:pointer;
+    font-family:'Baloo 2', sans-serif; transition:.15s;
+  }
+  .lang-switch button.active{
+    background:var(--pika); color:#1c1322;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:relative; z-index:1;
+    text-align:center; padding:28px 14px 10px;
+  }
+  h1.pixel{
+    font-size:15px; color:var(--pika);
+    text-shadow: 2px 2px 0 var(--cheek), 4px 4px 0 rgba(0,0,0,.4);
+    margin:0 0 6px; letter-spacing:1px;
+  }
+  .crowns{font-size:22px;}
+  .subtitle{font-size:14px; color:#cdb8ff; margin-top:4px;}
+
+  /* ---------- pikachu mascot ---------- */
+  .pika-wrap{
+    display:flex; justify-content:center; margin:14px 0 4px;
+  }
+  .pikachu{
+    position:relative; width:120px; height:110px;
+    animation: bounce 1.6s ease-in-out infinite;
+    cursor:pointer;
+  }
+  .pikachu:active{ transform:scale(.94); }
+  @keyframes bounce{
+    0%,100%{ transform:translateY(0) rotate(0deg); }
+    50%{ transform:translateY(-12px) rotate(-2deg); }
+  }
+  .pikachu .body{
+    position:absolute; left:20px; top:30px; width:80px; height:70px;
+    background:var(--pika); border-radius:45% 45% 50% 50%;
+    box-shadow: inset -8px -10px 0 var(--pika-dark);
+  }
+  .pikachu .ear{
+    position:absolute; width:22px; height:55px; background:var(--pika);
+    border-radius:50% 50% 0 0; box-shadow: inset -5px 0 0 var(--pika-dark);
+  }
+  .pikachu .ear.left{ left:10px; top:-22px; transform:rotate(-18deg);
+    animation: wiggleL 1.6s ease-in-out infinite;}
+  .pikachu .ear.right{ right:10px; top:-22px; transform:rotate(18deg);
+    animation: wiggleR 1.6s ease-in-out infinite;}
+  .pikachu .ear::after{
+    content:''; position:absolute; bottom:0; left:0; right:0; height:18px;
+    background:#1c1322; border-radius:50% 50% 0 0;
+  }
+  @keyframes wiggleL{ 0%,100%{transform:rotate(-18deg)} 50%{transform:rotate(-26deg)} }
+  @keyframes wiggleR{ 0%,100%{transform:rotate(18deg)} 50%{transform:rotate(26deg)} }
+  .pikachu .cheek{
+    position:absolute; width:16px; height:12px; background:var(--cheek);
+    border-radius:50%; top:62px; opacity:.9;
+  }
+  .pikachu .cheek.left{ left:18px; }
+  .pikachu .cheek.right{ right:18px; }
+  .pikachu .eye{
+    position:absolute; width:8px; height:10px; background:#1c1322;
+    border-radius:50%; top:48px;
+  }
+  .pikachu .eye.left{ left:38px; }
+  .pikachu .eye.right{ right:38px; }
+  .pikachu .mouth{
+    position:absolute; width:10px; height:6px; border:2px solid #1c1322;
+    border-top:none; border-radius:0 0 10px 10px; bottom:18px; left:55px;
+  }
+  .pikachu .tail{
+    position:absolute; right:-22px; top:8px; font-size:34px;
+    transform-origin:bottom left; animation: tailwag 1.6s ease-in-out infinite;
+  }
+  @keyframes tailwag{ 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(8deg)} }
+  .bolt{
+    position:absolute; font-size:22px; animation:zap 1s ease-in-out infinite;
+  }
+  .bolt.b1{ left:-30px; top:0; animation-delay:.1s;}
+  .bolt.b2{ right:-34px; bottom:10px; animation-delay:.4s;}
+  @keyframes zap{
+    0%,100%{ opacity:.25; transform:scale(.85) rotate(0deg);}
+    50%{ opacity:1; transform:scale(1.15) rotate(-8deg);}
+  }
+  .pika-hint{
+    font-size:11px; color:#9a86c9; margin-top:2px;
+  }
+
+  /* ---------- status banner ---------- */
+  .status{
+    max-width:520px; margin:18px auto 0; padding:14px 18px;
+    background:linear-gradient(135deg, var(--card), #3a2360);
+    border:3px solid var(--pika); border-radius:16px;
+    text-align:center; position:relative; z-index:1;
+    box-shadow: 0 0 22px rgba(255,203,5,.25);
+  }
+  .status .pixel{ font-size:11px; color:var(--spark); letter-spacing:1px; }
+  .status .big{ font-size:22px; font-weight:800; color:var(--pika); margin:6px 0;}
+  .status .sub{ font-size:13px; color:#cdb8ff; }
+
+  /* ---------- legend ---------- */
+  .legend{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    max-width:560px; margin:18px auto 8px; padding:0 14px; z-index:1; position:relative;
+  }
+  .legend .chip{
+    flex:1 1 100px; background:var(--card); border-radius:12px; padding:8px;
+    text-align:center; font-size:12px; border:2px solid #4a3380;
+  }
+  .legend .chip .em{font-size:20px; display:block;}
+  .legend .chip.do{ border-color:var(--ok); }
+  .legend .chip.opt{ border-color:var(--meh); }
+  .legend .chip.skip{ border-color:var(--skip); }
+
+  /* ---------- day tabs ---------- */
+  .day-tabs{
+    display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
+    max-width:560px; margin:20px auto 4px; padding:0 14px; z-index:1; position:relative;
+  }
+  .day-tab{
+    flex:1 1 60px; cursor:pointer; text-align:center; padding:10px 4px;
+    background:var(--card); border:2px solid #4a3380; border-radius:10px;
+    font-weight:800; font-size:13px; color:var(--cream); transition:.15s;
+  }
+  .day-tab small{ display:block; font-size:9px; color:#b3a0e0; font-weight:500; }
+  .day-tab.active{
+    background:var(--pika); color:#1c1322; border-color:var(--pika);
+    box-shadow:0 0 16px rgba(255,203,5,.6); transform:translateY(-2px);
+  }
+  .day-tab.today::after{
+    content:'⚡'; display:block; font-size:13px; margin-top:2px;
+    animation: zap 1s ease-in-out infinite;
+  }
+
+  /* ---------- day view ---------- */
+  .day-view{
+    max-width:560px; margin:14px auto; padding:0 14px; z-index:1; position:relative;
+  }
+  .day-view h2{
+    font-size:16px; color:var(--spark); margin:6px 4px 10px; text-align:center;
+  }
+  .task{
+    display:flex; align-items:center; gap:10px; background:var(--card);
+    border-radius:12px; padding:10px 14px; margin-bottom:8px;
+    border-left:6px solid var(--skip); transition:.15s;
+  }
+  .task.do{ border-left-color:var(--ok); }
+  .task.opt{ border-left-color:var(--meh); }
+  .task.skip{ opacity:.55; }
+  .task .icon{ font-size:22px; min-width:30px; text-align:center; }
+  .task .name{ flex:1; font-size:14px; font-weight:700; }
+  .task .tag{
+    font-size:10px; padding:3px 8px; border-radius:8px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.5px;
+  }
+  .task.do .tag{ background:var(--ok); color:#0c2a14; }
+  .task.opt .tag{ background:var(--meh); color:#3a2a00; }
+  .task.skip .tag{ background:var(--skip); color:#1c1322; }
+  .task.do.highlight{
+    animation: glow 1.4s ease-in-out infinite;
+  }
+  @keyframes glow{
+    0%,100%{ box-shadow:0 0 4px rgba(94,227,123,.3); }
+    50%{ box-shadow:0 0 18px rgba(94,227,123,.85); }
+  }
+
+  /* ---------- full grid ---------- */
+  .grid-section{
+    max-width:680px; margin:30px auto 10px; padding:0 14px; z-index:1; position:relative;
+  }
+  .grid-section h2{ font-size:15px; color:var(--spark); text-align:center; }
+  .grid-scroll{ overflow-x:auto; border-radius:14px; border:2px solid #4a3380; }
+  table{ width:100%; border-collapse:collapse; min-width:560px; background:var(--card); }
+  th,td{ text-align:center; padding:8px 6px; font-size:12px; border-bottom:1px solid #4a3380; }
+  th{ background:#3a2360; color:var(--pika); font-size:11px; position:sticky; top:0; }
+  td.label, th.label{ text-align:left; font-size:11px; color:var(--cream); white-space:nowrap; padding-left:10px; }
+  td.cell{ font-size:16px; }
+  .today-col{ background:rgba(255,203,5,.16); box-shadow: inset 0 0 0 2px var(--pika); }
+
+  footer{
+    text-align:center; font-size:11px; color:#8a78b8; margin-top:30px; padding:0 20px; z-index:1; position:relative;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sparks" id="sparks"></div>
+
+<div class="lang-switch">
+  <button id="btnKo" class="active">한국어</button>
+  <button id="btnEn">English</button>
+</div>
+
+<header>
+  <div class="crowns">👑✨👑</div>
+  <h1 class="pixel" id="title">SVS PREP GUIDE</h1>
+  <div class="subtitle" id="subtitle">Get your kingdom battle-ready, trainer!</div>
+  <div class="pika-wrap">
+    <div class="pikachu" id="pikachu" title="Pikachu">
+      <span class="bolt b1">⚡</span>
+      <div class="body"></div>
+      <div class="ear left"></div>
+      <div class="ear right"></div>
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+      <div class="cheek left"></div>
+      <div class="cheek right"></div>
+      <div class="mouth"></div>
+      <span class="tail">⚡</span>
+      <span class="bolt b2">⚡</span>
+    </div>
+  </div>
+  <div class="pika-hint" id="pikaHint">피카츄를 탭하면 잠자러 갑니다 💤</div>
+
+  <div class="status" id="statusBox">
+    <div class="pixel">LOADING…</div>
+  </div>
+</header>
+
+<section class="legend">
+  <div class="chip do"><span class="em">✅</span><span class="legendText" data-key="legendDo"></span></div>
+  <div class="chip opt"><span class="em">🆗</span><span class="legendText" data-key="legendOpt"></span></div>
+  <div class="chip skip"><span class="em">🚫</span><span class="legendText" data-key="legendSkip"></span></div>
+</section>
+
+<nav class="day-tabs" id="dayTabs"></nav>
+
+<section class="day-view">
+  <h2 id="dayTitle">Day 1 Tasks</h2>
+  <div id="taskList"></div>
+</section>
+
+<section class="grid-section">
+  <h2 id="overviewTitle">📋 Full 5-Day Overview</h2>
+  <div class="grid-scroll">
+    <table id="overviewTable"></table>
+  </div>
+</section>
+
+<footer>
+  <span id="footerText"></span>
+</footer>
+
+<script>
+// ---------- TRANSLATIONS ----------
+const i18n = {
+  ko: {
+    title: "SVS 준비 가이드",
+    subtitle: "킹덤을 전투 준비 완료 상태로 만들어봐요!",
+    pikaHint: "피카츄를 탭하면 잠자러 갑니다 💤",
+    legendDo: "오늘 해야 함 (최우선)",
+    legendOpt: "선택 사항 — 자원이 남으면",
+    legendSkip: "건너뛰기 — 나중을 위해 아껴두세요",
+    statusBefore: (h)=>`준비 미시작<br><span class="big">⚡ Day 1까지 약 ${h}시간 ⚡</span><br>충전 중... 카운트다운 시작!`,
+    statusLabelBefore: "준비 시작 전",
+    statusActive: (d)=>`SVS 준비 진행 중<br><span class="big">⚡ 오늘은 Day ${d} / 5 ⚡</span><br>피카츄가 오늘의 우선 과제를 골라줬어요!`,
+    statusLabelActive: "준비 진행 중",
+    statusAfter: `준비 기간 종료<br><span class="big">🏆 5일 모두 완료! 🏆</span><br>이제 SVS에서 천둥을 보여줄 시간입니다!`,
+    statusLabelAfter: "준비 완료",
+    dayLabel: "Day",
+    today: "오늘",
+    dayTasks: (d)=>`Day ${d} 과제`,
+    todayTag: " — ⚡ 오늘 ⚡",
+    tagDo: "오늘 진행",
+    tagOpt: "선택",
+    tagSkip: "건너뛰기",
+    overviewTitle: "📋 5일 전체 보기",
+    category: "항목",
+    footer: "피카-파워로 준비를 마치고 SVS를 정복하세요! ⚡👑",
+    categories: [
+      "🏗️ 건설 가속",
+      "💎 FC 조각",
+      "🦸 영웅 조각",
+      "🔬 연구 가속",
+      "⚔️ 훈련 가속",
+      "🚑 치료 가속",
+      "🎡 행운의 룰렛",
+      "🌾 채집",
+      "🎯 전용 스킬",
+      "🧿 엑스퍼트 인장",
+      "📘 지식",
+      "🐺 비스트 사냥",
+      "🐾 펫 진화",
+      "🔮 추장 부적",
+      "⚙️ 추장 장비",
+      "🛡️ 위젯 장비",
+      "⛏️ 미스릴",
+    ],
+  },
+  en: {
+    title: "SVS PREP GUIDE",
+    subtitle: "Get your kingdom battle-ready, trainer!",
+    pikaHint: "Tap Pikachu to go to sleep 💤",
+    legendDo: "Do today — top priority",
+    legendOpt: "Optional — if you have spare resources",
+    legendSkip: "Skip — save for later",
+    statusBefore: (h)=>`PREP NOT STARTED YET<br><span class="big">⚡ Day 1 starts in ~${h}h ⚡</span><br>Charge up — the countdown is on!`,
+    statusLabelBefore: "PREP NOT STARTED YET",
+    statusActive: (d)=>`SVS PREP IN PROGRESS<br><span class="big">⚡ Today is DAY ${d} of 5 ⚡</span><br>Pikachu's picked out today's priorities for you below!`,
+    statusLabelActive: "SVS PREP IN PROGRESS",
+    statusAfter: `PREP WINDOW COMPLETE<br><span class="big">🏆 All 5 Days Done! 🏆</span><br>Time to bring the thunder in SVS!`,
+    statusLabelAfter: "PREP WINDOW COMPLETE",
+    dayLabel: "Day",
+    today: "TODAY",
+    dayTasks: (d)=>`Day ${d} Tasks`,
+    todayTag: " — ⚡ TODAY ⚡",
+    tagDo: "Do today",
+    tagOpt: "Optional",
+    tagSkip: "Skip",
+    overviewTitle: "📋 Full 5-Day Overview",
+    category: "Category",
+    footer: "Pika-power your prep and dominate the State vs State! ⚡👑",
+    categories: [
+      "🏗️ Building Speedups",
+      "💎 FC Shards",
+      "🦸 Hero Shards",
+      "🔬 Research Speedups",
+      "⚔️ Training Speedups",
+      "🚑 Healing Speedups",
+      "🎡 Lucky Wheel",
+      "🌾 Gathering",
+      "🎯 Exclusive Skills",
+      "🧿 Expert Sigils",
+      "📘 Knowledge",
+      "🐺 Beast Hunt",
+      "🐾 Pets Advance",
+      "🔮 Chief Charm",
+      "⚙️ Chief Gear",
+      "🛡️ Widget Gear",
+      "⛏️ Mithril",
+    ],
+  }
+};
+
+// status icons per category, Day1..Day5
+const statusIcons = [
+  ["✅","🆗","🚫","🚫","🆗"],
+  ["🆗","✅","🚫","🚫","🆗"],
+  ["🚫","✅","🆗","🚫","🚫"],
+  ["✅","🆗","🚫","🚫","🆗"],
+  ["🚫","🚫","🚫","✅","🆗"],
+  ["🆗","✅","🚫","🚫","🆗"],
+  ["🚫","✅","🆗","🚫","🚫"],
+  ["🚫","✅","🚫","🚫","🚫"],
+  ["🆗","✅","🚫","🚫","🆗"],
+  ["🚫","✅","🆗","🚫","🚫"],
+  ["🚫","✅","🆗","🚫","🚫"],
+  ["🚫","🚫","✅","🚫","🚫"],
+  ["🚫","🚫","🆗","🚫","✅"],
+  ["🆗","🚫","🆗","✅","🚫"],
+  ["🚫","🚫","🚫","🚫","✅"],
+  ["🚫","🚫","🚫","🆗","✅"],
+  ["🚫","🚫","🚫","🆗","✅"],
+];
+const map = { "✅":"do", "🆗":"opt", "🚫":"skip" };
+
+// ---------- DATE LOGIC (UTC-based) ----------
+const DAY1 = Date.UTC(2026, 5, 15, 0, 0, 0, 0); // June 15, 2026 00:00 UTC — "Day 1 starts tomorrow"
+const now = new Date();
+const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0);
+const diffDays = Math.round((todayUTC - DAY1) / 86400000) + 1;
+
+let currentDay, phase;
+if (diffDays < 1) { phase = "before"; currentDay = 1; }
+else if (diffDays > 5) { phase = "after"; currentDay = 5; }
+else { phase = "active"; currentDay = diffDays; }
+
+let lang = "ko";
+let selectedDay = currentDay;
+
+// ---------- RENDER ----------
+function render(){
+  const t = i18n[lang];
+  document.documentElement.lang = lang;
+
+  document.getElementById('title').textContent = t.title;
+  document.getElementById('subtitle').textContent = t.subtitle;
+  document.getElementById('pikaHint').textContent = t.pikaHint;
+  document.getElementById('footerText').textContent = t.footer;
+  document.getElementById('overviewTitle').textContent = t.overviewTitle;
+
+  document.querySelectorAll('.legendText').forEach(el => {
+    el.textContent = t[el.dataset.key];
+  });
+
+  // status banner
+  const statusBox = document.getElementById('statusBox');
+  let label, body;
+  if (phase === "before") {
+    const hoursLeft = Math.ceil((DAY1 - Date.now()) / 3600000);
+    label = t.statusLabelBefore;
+    body = t.statusBefore(hoursLeft);
+  } else if (phase === "active") {
+    label = t.statusLabelActive;
+    body = t.statusActive(currentDay);
+  } else {
+    label = t.statusLabelAfter;
+    body = t.statusAfter;
+  }
+  statusBox.innerHTML = `<div class="pixel">${label}</div><div class="sub">${body}</div>`;
+
+  renderTabs();
+  renderDay();
+  renderTable();
+
+  document.getElementById('btnKo').classList.toggle('active', lang === 'ko');
+  document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+}
+
+function renderTabs(){
+  const t = i18n[lang];
+  const dayTabs = document.getElementById('dayTabs');
+  dayTabs.innerHTML = "";
+  for (let d = 1; d <= 5; d++){
+    const tab = document.createElement('div');
+    tab.className = 'day-tab';
+    if (d === selectedDay) tab.classList.add('active');
+    if (phase === "active" && d === currentDay) tab.classList.add('today');
+    tab.innerHTML = `${t.dayLabel} ${d}<small>${d===currentDay && phase==="active" ? t.today : ""}</small>`;
+    tab.addEventListener('click', () => { selectedDay = d; render(); });
+    dayTabs.appendChild(tab);
+  }
+}
+
+function renderDay(){
+  const t = i18n[lang];
+  const dayTitle = document.getElementById('dayTitle');
+  const taskList = document.getElementById('taskList');
+  dayTitle.textContent = t.dayTasks(selectedDay) + (phase==="active" && selectedDay===currentDay ? t.todayTag : "");
+  taskList.innerHTML = "";
+
+  const order = { do:0, opt:1, skip:2 };
+  const items = t.categories.map((name, i) => ({
+    name,
+    status: map[statusIcons[i][selectedDay-1]]
+  })).sort((a,b)=> order[a.status]-order[b.status]);
+
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = `task ${item.status}`;
+    if (item.status === 'do' && phase==='active' && selectedDay===currentDay) row.classList.add('highlight');
+    const icon = item.status === 'do' ? '✅' : item.status === 'opt' ? '🆗' : '🚫';
+    const tag = item.status === 'do' ? t.tagDo : item.status === 'opt' ? t.tagOpt : t.tagSkip;
+    row.innerHTML = `<span class="icon">${icon}</span><span class="name">${item.name}</span><span class="tag">${tag}</span>`;
+    taskList.appendChild(row);
+  });
+}
+
+function renderTable(){
+  const t = i18n[lang];
+  const table = document.getElementById('overviewTable');
+  let thead = `<tr><th class="label">${t.category}</th>`;
+  for (let d=1; d<=5; d++){
+    const isToday = phase==="active" && d===currentDay;
+    thead += `<th class="${isToday?'today-col':''}">${t.dayLabel} ${d}${isToday?' ⚡':''}</th>`;
+  }
+  thead += `</tr>`;
+  let rows = "";
+  t.categories.forEach((name, i) => {
+    rows += `<tr><td class="label">${name}</td>`;
+    statusIcons[i].forEach((icon, idx) => {
+      const isToday = phase==="active" && (idx+1)===currentDay;
+      rows += `<td class="cell ${isToday?'today-col':''}">${icon}</td>`;
+    });
+    rows += `</tr>`;
+  });
+  table.innerHTML = thead + rows;
+}
+
+// ---------- LANGUAGE BUTTONS ----------
+document.getElementById('btnKo').addEventListener('click', () => { lang = 'ko'; render(); });
+document.getElementById('btnEn').addEventListener('click', () => { lang = 'en'; render(); });
+
+// ---------- PIKACHU REDIRECT ----------
+document.getElementById('pikachu').addEventListener('click', () => {
+  window.location.href = 'sleep.html';
+});
+
+// ---------- FLOATING SPARKS ----------
+const sparksEl = document.getElementById('sparks');
+for (let i=0;i<14;i++){
+  const s = document.createElement('span');
+  s.textContent = "⚡";
+  s.style.left = Math.random()*100 + "%";
+  s.style.animationDuration = (8 + Math.random()*10) + "s";
+  s.style.animationDelay = (Math.random()*10) + "s";
+  s.style.fontSize = (12 + Math.random()*16) + "px";
+  sparksEl.appendChild(s);
+}
+
+// ---------- INIT ----------
+render();
+</script>
+</body>
+</html>

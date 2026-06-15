@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pikachu Sleeps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: linear-gradient(180deg, #1a1a2e 0%, #20203c 100%);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Nunito', sans-serif;
+    transition: background 2s ease;
+    padding: clamp(16px, 4vw, 40px) clamp(12px, 4vw, 40px);
+    gap: clamp(10px, 2vh, 20px);
+  }
+
+  body.lights-off {
+    background: linear-gradient(180deg, #050510 0%, #0a0a18 100%);
+  }
+
+  /* ── Stars ── */
+  .stars {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s ease;
+    z-index: 0;
+  }
+  body.lights-off .stars { opacity: 1; }
+
+  .star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle var(--d, 3s) infinite ease-in-out;
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0.2; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.4); }
+  }
+
+  /* ── Shooting stars ── */
+  .shooting-star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 6px 2px #fff, 0 0 0 1px #fff;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .shooting-star::before {
+    content: '';
+    position: absolute;
+    top: 50%; right: 1px;
+    width: 80px; height: 1px;
+    background: linear-gradient(90deg, #fff, transparent);
+    transform: translateY(-50%);
+  }
+  .shooting-star.go {
+    animation: shoot 1.4s ease-out forwards;
+  }
+  @keyframes shoot {
+    0%   { opacity: 1; transform: translate(0,0); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-220px, 160px); }
+  }
+
+  /* ── Clouds (drift while lights are on) ── */
+  .clouds {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.5;
+    transition: opacity 2s ease;
+    z-index: 0;
+  }
+  body.lights-off .clouds { opacity: 0.12; }
+  .cloud {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50px;
+    filter: blur(2px);
+    opacity: 0.08;
+    animation: drift linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+  .cloud1 { width: 160px; height: 40px; top: 8%;  animation-duration: 70s; }
+  .cloud1::before { width: 70px; height: 70px; top: -35px; left: 20px; }
+  .cloud1::after  { width: 50px; height: 50px; top: -22px; left: 90px; }
+  .cloud2 { width: 120px; height: 32px; top: 22%; animation-duration: 95s; animation-delay: -30s; opacity:0.06; }
+  .cloud2::before { width: 56px; height: 56px; top: -28px; left: 14px; }
+  .cloud2::after  { width: 40px; height: 40px; top: -18px; left: 70px; }
+  @keyframes drift {
+    0%   { transform: translateX(-200px); }
+    100% { transform: translateX(110vw); }
+  }
+
+  /* ── Moon ── */
+  .moon {
+    position: fixed;
+    top: clamp(16px, 4vw, 40px);
+    right: clamp(16px, 6vw, 80px);
+    width: clamp(46px, 12vw, 70px);
+    height: clamp(46px, 12vw, 70px);
+    background: #ffe680;
+    border-radius: 50%;
+    box-shadow: 0 0 30px #ffe68077, 0 0 60px #ffe68033;
+    opacity: 0;
+    transition: opacity 2s ease 1s;
+    z-index: 0;
+  }
+  .moon::before, .moon::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: #f5d370;
+    opacity: 0.6;
+  }
+  .moon::before { width: 30%; height: 30%; top: 18%; left: 14%; }
+  .moon::after  { width: 18%; height: 18%; top: 55%; left: 55%; }
+  body.lights-off .moon { opacity: 1; }
+
+  /* ── Room ── */
+  .room {
+    position: relative;
+    width: min(420px, 100%);
+    background: #2a2a4a;
+    border-radius: 24px;
+    padding: clamp(20px, 6vw, 32px) clamp(18px, 6vw, 32px) clamp(16px, 4vw, 24px);
+    box-shadow: 0 8px 40px #00000066;
+    transition: background 2s ease;
+    border: 2px solid #3a3a6a;
+    z-index: 1;
+  }
+  body.lights-off .room {
+    background: #0d0d1a;
+    border-color: #1a1a3a;
+  }
+
+  /* ── Lamp ── */
+  .lamp-wrap {
+    position: absolute;
+    top: -10px;
+    right: clamp(20px, 9%, 40px);
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .lamp-head {
+    width: clamp(36px, 10vw, 44px);
+    height: clamp(24px, 7vw, 28px);
+    background: linear-gradient(135deg, #f5c842, #e8a800);
+    border-radius: 50% 50% 4px 4px;
+    box-shadow: 0 0 18px #f5c84288;
+    transition: box-shadow 0.6s ease, background 0.6s ease;
+    position: relative;
+  }
+  .lamp-head::after {
+    content: '';
+    position: absolute;
+    bottom: -8px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 10px;
+    background: #a07840;
+    border-radius: 2px;
+  }
+  body.lights-off .lamp-head {
+    box-shadow: none;
+    background: linear-gradient(135deg, #8a7030, #5a4a20);
+  }
+  .lamp-glow {
+    width: clamp(64px, 18vw, 80px);
+    height: clamp(32px, 9vw, 40px);
+    background: radial-gradient(ellipse, #f5c84255 0%, transparent 70%);
+    margin-top: -4px;
+    transition: opacity 0.6s ease;
+  }
+  body.lights-off .lamp-glow { opacity: 0; }
+  .lamp-base {
+    width: 6px; height: clamp(20px, 6vw, 28px);
+    background: #a07840;
+    border-radius: 3px;
+    margin-top: 0;
+  }
+
+  /* ── Bed ── */
+  .bed {
+    margin: clamp(40px, 14vw, 60px) auto 0;
+    width: 100%;
+    position: relative;
+  }
+  .pillow {
+    width: 35%; height: clamp(32px, 11vw, 44px);
+    background: linear-gradient(135deg, #e8d0f0, #c8a8e0);
+    border-radius: 20px;
+    position: absolute;
+    top: 16px; left: 6%;
+    box-shadow: 2px 2px 8px #00000033;
+  }
+  .blanket {
+    width: 100%; height: clamp(64px, 22vw, 90px);
+    background: linear-gradient(135deg, #5b4fcf, #8b5cf6, #a78bfa);
+    border-radius: 16px 16px 8px 8px;
+    position: relative;
+    top: 50px;
+    box-shadow: 0 4px 16px #5b4fcf44;
+  }
+  .blanket-pattern {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(255,255,255,0.05) 20px,
+      rgba(255,255,255,0.05) 40px
+    );
+  }
+  .bed-frame {
+    width: calc(100% + 6%); height: 22px;
+    background: linear-gradient(#7c5c3a, #5a3f22);
+    border-radius: 6px;
+    position: relative;
+    top: 56px;
+    left: -3%;
+    box-shadow: 0 4px 12px #00000044;
+  }
+
+  /* ── Pikachu ── */
+  .pikachu-wrap {
+    position: absolute;
+    bottom: clamp(96px, 32vw, 120px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    animation: idle-bob 2s infinite ease-in-out;
+    transition: bottom 1.5s cubic-bezier(0.4,0,0.2,1),
+                left 1.5s cubic-bezier(0.4,0,0.2,1),
+                transform 1.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .pikachu-wrap.walking {
+    animation: walk-to-lamp 1.6s forwards ease-in-out;
+  }
+  .pikachu-wrap.climbing {
+    animation: climb-lamp 0.8s forwards ease-in-out;
+  }
+  .pikachu-wrap.sleeping {
+    bottom: clamp(78px, 26vw, 98px);
+    transform: translateX(-50%) scaleY(0.85);
+    animation: sleep-breathe 3s infinite ease-in-out;
+  }
+  @keyframes idle-bob {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-5px); }
+  }
+  @keyframes sleep-breathe {
+    0%,100% { transform: translateX(-50%) scaleY(0.85) scaleX(1); }
+    50%      { transform: translateX(-50%) scaleY(0.82) scaleX(1.03); }
+  }
+  @keyframes walk-to-lamp {
+    0%   { left: 50%; }
+    60%  { left: 76%; }
+    100% { left: 76%; }
+  }
+  @keyframes climb-lamp {
+    0%   { bottom: clamp(96px, 32vw, 120px); }
+    100% { bottom: clamp(146px, 48vw, 180px); }
+  }
+
+  svg.pika {
+    width: clamp(64px, 22vw, 90px);
+    height: clamp(64px, 22vw, 90px);
+    display: block;
+  }
+
+  /* ── ZZZ ── */
+  .zzz {
+    position: absolute;
+    top: -10px; right: -20px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .zzz span {
+    display: block;
+    font-family: 'Fredoka One', cursive;
+    color: #a78bfa;
+    text-shadow: 0 0 8px #a78bfa88;
+    animation: float-z 2.4s infinite ease-in-out;
+    opacity: 0;
+  }
+  .zzz span:nth-child(1) { font-size: 14px; animation-delay: 0s;    left: 0; }
+  .zzz span:nth-child(2) { font-size: 18px; animation-delay: 0.8s;  left: 8px; }
+  .zzz span:nth-child(3) { font-size: 22px; animation-delay: 1.6s;  left: 16px; }
+  @keyframes float-z {
+    0%   { opacity: 0;   transform: translate(0, 0) rotate(-10deg); }
+    30%  { opacity: 1; }
+    100% { opacity: 0;   transform: translate(14px, -32px) rotate(10deg); }
+  }
+  .zzz.visible { opacity: 1; }
+
+  /* ── Floating hearts (after sleeping) ── */
+  .heart-field {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 4;
+  }
+  .heart {
+    position: absolute;
+    font-size: 16px;
+    opacity: 0;
+    color: #ff9ec7;
+    text-shadow: 0 0 8px #ff9ec788;
+    animation: heart-float 4s ease-in forwards;
+  }
+  @keyframes heart-float {
+    0%   { opacity: 0; transform: translateY(0) scale(0.6) rotate(0deg); }
+    15%  { opacity: 0.9; }
+    100% { opacity: 0; transform: translateY(-160px) scale(1.1) rotate(20deg); }
+  }
+
+  /* ── Fireflies near bed when asleep ── */
+  .firefly {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #c9f5a8;
+    box-shadow: 0 0 8px 3px #c9f5a8aa;
+    opacity: 0;
+    animation: firefly-float 6s ease-in-out infinite;
+  }
+  body.lights-off .firefly { opacity: 0.85; }
+  @keyframes firefly-float {
+    0%,100% { transform: translate(0,0); opacity: 0.3; }
+    25%      { transform: translate(10px,-14px); opacity: 0.9; }
+    50%      { transform: translate(-6px,-22px); opacity: 0.4; }
+    75%      { transform: translate(-14px,-6px); opacity: 0.85; }
+  }
+
+  /* ── Sleep Well text ── */
+  .sleep-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(28px, 9vw, 52px);
+    letter-spacing: clamp(1px, 0.6vw, 3px);
+    background: linear-gradient(90deg, #f5c842, #a78bfa, #5b8af5, #a78bfa, #f5c842);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    transition: opacity 1.5s ease, transform 1.5s ease;
+    text-align: center;
+    margin-top: clamp(16px, 5vw, 32px);
+    filter: drop-shadow(0 0 12px #a78bfa55);
+    z-index: 1;
+    word-break: keep-all;
+  }
+  .sleep-text.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  @keyframes shimmer {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  /* ── Sweet little message card ── */
+  .message-card {
+    z-index: 1;
+    max-width: min(420px, 100%);
+    width: 100%;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 1.5s ease 0.3s, transform 1.5s ease 0.3s;
+    padding: 0 8px;
+  }
+  .message-card.visible { opacity: 1; transform: translateY(0); }
+  .message-card .cute-msg {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: clamp(13px, 3.6vw, 17px);
+    color: #d8c8ff;
+    background: linear-gradient(135deg, #2e2a55, #241f47);
+    border: 1px solid #5b4fcf66;
+    border-radius: 18px;
+    padding: clamp(10px, 3vw, 14px) clamp(14px, 4vw, 20px);
+    box-shadow: 0 4px 20px #00000044, inset 0 1px 0 #ffffff11;
+    display: inline-block;
+    animation: gentle-pulse 3.5s ease-in-out infinite;
+  }
+  @keyframes gentle-pulse {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.02); }
+  }
+
+  /* ── Sub text ── */
+  .sub-text {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(11px, 3vw, 15px);
+    color: #7070a0;
+    text-align: center;
+    margin-top: 8px;
+    letter-spacing: clamp(0.5px, 0.4vw, 2px);
+    opacity: 0;
+    transition: opacity 2s ease 3s;
+    z-index: 1;
+  }
+  body.lights-off .sub-text { opacity: 1; }
+
+  /* ── Button ── */
+  .restart-btn {
+    margin-top: 4px;
+    padding: clamp(8px, 2.4vw, 10px) clamp(20px, 6vw, 28px);
+    background: transparent;
+    border: 2px solid #5b4fcf;
+    color: #a78bfa;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(13px, 4vw, 16px);
+    border-radius: 30px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 1s ease, background 0.3s, color 0.3s, transform 0.2s;
+    letter-spacing: 1px;
+    z-index: 1;
+  }
+  .restart-btn:hover { background: #5b4fcf22; color: #fff; transform: translateY(-2px); }
+  .restart-btn:active { transform: translateY(0); }
+  .restart-btn.visible { opacity: 1; }
+
+  /* ── Small screens fine-tuning ── */
+  @media (max-width: 360px) {
+    .pikachu-wrap.sleeping { bottom: 70px; }
+    .moon { display: none; }
+  }
+
+  @media (max-height: 700px) {
+    body { justify-content: flex-start; padding-top: clamp(16px, 4vh, 32px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+<!-- Clouds -->
+<div class="clouds">
+  <div class="cloud cloud1"></div>
+  <div class="cloud cloud2"></div>
+</div>
+<!-- Moon -->
+<div class="moon"></div>
+
+<!-- Room -->
+<div class="room" id="room">
+
+  <!-- Lamp -->
+  <div class="lamp-wrap" id="lamp">
+    <div class="lamp-head"></div>
+    <div class="lamp-glow"></div>
+    <div class="lamp-base"></div>
+  </div>
+
+  <!-- Pikachu -->
+  <div class="pikachu-wrap" id="pika">
+    <!-- ZZZ -->
+    <div class="zzz" id="zzz">
+      <span>z</span><span>Z</span><span>Z</span>
+    </div>
+    <!-- Heart field -->
+    <div class="heart-field" id="heartField"></div>
+    <!-- Pikachu SVG (hand-drawn style) -->
+    <svg class="pika" id="pikaSvg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- Ears -->
+      <polygon points="18,28 10,4 30,18" fill="#f5c842" stroke="#c8960c" stroke-width="1.5"/>
+      <polygon points="82,28 90,4 70,18" fill="#f5c842" stroke="#c8960c" stroke-width="1.5"/>
+      <polygon points="19,26 13,9 28,19" fill="#1a1a1a"/>
+      <polygon points="81,26 87,9 72,19" fill="#1a1a1a"/>
+      <!-- Head -->
+      <ellipse cx="50" cy="42" rx="28" ry="25" fill="#f5c842" stroke="#c8960c" stroke-width="1.5"/>
+      <!-- Cheeks -->
+      <ellipse cx="26" cy="50" rx="8" ry="6" fill="#f55a30" opacity="0.85"/>
+      <ellipse cx="74" cy="50" rx="8" ry="6" fill="#f55a30" opacity="0.85"/>
+      <!-- Eyes — awake -->
+      <g id="eyesAwake">
+        <ellipse cx="38" cy="38" rx="5" ry="5.5" fill="#1a1a1a"/>
+        <ellipse cx="62" cy="38" rx="5" ry="5.5" fill="#1a1a1a"/>
+        <circle cx="40" cy="36.5" r="1.5" fill="white"/>
+        <circle cx="64" cy="36.5" r="1.5" fill="white"/>
+      </g>
+      <!-- Eyes — sleeping (hidden initially) -->
+      <g id="eyesSleep" opacity="0">
+        <path d="M33 38 Q38 34 43 38" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M57 38 Q62 34 67 38" fill="none" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/>
+      </g>
+      <!-- Mouth -->
+      <path id="mouthAwake" d="M43 52 Q50 58 57 52" fill="none" stroke="#c8960c" stroke-width="2" stroke-linecap="round"/>
+      <path id="mouthSleep" d="M45 54 Q50 56 55 54" fill="none" stroke="#c8960c" stroke-width="1.5" stroke-linecap="round" opacity="0"/>
+      <!-- Body -->
+      <ellipse cx="50" cy="75" rx="22" ry="18" fill="#f5c842" stroke="#c8960c" stroke-width="1.5"/>
+      <!-- Tummy -->
+      <ellipse cx="50" cy="76" rx="12" ry="9" fill="#f0e0b0"/>
+      <!-- Arms -->
+      <ellipse cx="27" cy="72" rx="7" ry="5" fill="#f5c842" stroke="#c8960c" stroke-width="1.2" transform="rotate(-20,27,72)"/>
+      <ellipse cx="73" cy="72" rx="7" ry="5" fill="#f5c842" stroke="#c8960c" stroke-width="1.2" transform="rotate(20,73,72)"/>
+      <!-- Tail -->
+      <path d="M68 84 Q82 72 88 58 Q90 50 84 46" fill="none" stroke="#f5c842" stroke-width="6" stroke-linecap="round"/>
+      <path d="M68 84 Q82 72 88 58 Q90 50 84 46" fill="none" stroke="#c8960c" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Lightning tip -->
+      <polygon points="84,46 78,56 86,54 80,64" fill="#f5c842" stroke="#c8960c" stroke-width="1"/>
+      <!-- Legs -->
+      <ellipse cx="40" cy="91" rx="9" ry="5" fill="#f5c842" stroke="#c8960c" stroke-width="1.2"/>
+      <ellipse cx="60" cy="91" rx="9" ry="5" fill="#f5c842" stroke="#c8960c" stroke-width="1.2"/>
+    </svg>
+  </div>
+
+  <!-- Fireflies -->
+  <div class="firefly" style="bottom: 30px; left: 18%; animation-delay: 0s;"></div>
+  <div class="firefly" style="bottom: 60px; left: 75%; animation-delay: 1.2s;"></div>
+  <div class="firefly" style="bottom: 90px; left: 40%; animation-delay: 2.4s;"></div>
+  <div class="firefly" style="bottom: 45px; left: 88%; animation-delay: 3.6s;"></div>
+
+  <!-- Bed -->
+  <div class="bed">
+    <div class="pillow"></div>
+    <div class="blanket"><div class="blanket-pattern"></div></div>
+    <div class="bed-frame"></div>
+  </div>
+
+</div>
+
+<!-- Sleep text -->
+<div class="sleep-text" id="sleepText">✨ 푹 주무세요 ✨</div>
+
+<!-- Cute message -->
+<div class="message-card" id="messageCard">
+  <div class="cute-msg">🌙💜 얘들아, 좋은 꿈 꿔!!! 내일 또 만나자 🐾✨</div>
+</div>
+
+<div class="sub-text">탭하면 다시 시작 · Tap restart to dream again</div>
+<button class="restart-btn" id="restartBtn" onclick="restart()">▶ 다시</button>
+
+<script>
+  // ── Stars ──
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%; left:${Math.random()*100}%;
+      --d:${(Math.random()*3+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*4).toFixed(1)}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // ── Shooting stars (random, only once it's dark) ──
+  function spawnShootingStar() {
+    if (!document.body.classList.contains('lights-off')) return;
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    star.style.top = (Math.random() * 40) + '%';
+    star.style.left = (60 + Math.random() * 35) + '%';
+    document.body.appendChild(star);
+    requestAnimationFrame(() => star.classList.add('go'));
+    setTimeout(() => star.remove(), 1600);
+  }
+  setInterval(spawnShootingStar, 4000);
+
+  // ── Floating hearts once Pikachu is asleep ──
+  const heartField = document.getElementById('heartField');
+  const heartEmojis = ['💜','✨','💤','🌙','⭐'];
+  let heartsRunning = false;
+  function spawnHeart() {
+    if (!heartsRunning) return;
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
+    h.style.left = (20 + Math.random() * 60) + '%';
+    h.style.bottom = '10px';
+    h.style.animationDuration = (3.5 + Math.random()*1.5) + 's';
+    heartField.appendChild(h);
+    setTimeout(() => h.remove(), 5200);
+  }
+  setInterval(spawnHeart, 900);
+
+  // ── State machine ──
+  const pika    = document.getElementById('pika');
+  const pikaSvg = document.getElementById('pikaSvg');
+  const zzz     = document.getElementById('zzz');
+  const sleepText = document.getElementById('sleepText');
+  const messageCard = document.getElementById('messageCard');
+  const restartBtn = document.getElementById('restartBtn');
+  const body    = document.body;
+
+  let phase = 'idle'; // idle → walking → switching → sleeping
+
+  // Click lamp OR Pikachu to start
+  document.getElementById('lamp').addEventListener('click', startSequence);
+  pika.addEventListener('click', startSequence);
+
+  function startSequence() {
+    if (phase !== 'idle') return;
+    phase = 'walking';
+
+    // 1. Walk to lamp
+    pika.classList.add('walking');
+
+    setTimeout(() => {
+      // 2. Climb lamp
+      pika.classList.remove('walking');
+      pika.classList.add('climbing');
+
+      setTimeout(() => {
+        // 3. CLICK! Lights off
+        pika.classList.remove('climbing');
+        flashLamp();
+        body.classList.add('lights-off');
+
+        setTimeout(() => {
+          // 4. Walk back to bed
+          pika.style.transition = 'left 1.2s ease';
+          pika.style.left = '50%';
+
+          setTimeout(() => {
+            // 5. Lie down and sleep
+            pika.style.transition = '';
+            pika.classList.add('sleeping');
+            switchToSleepFace();
+            zzz.classList.add('visible');
+            phase = 'sleeping';
+            heartsRunning = true;
+
+            // 6. Show sleep text + cute message
+            setTimeout(() => {
+              sleepText.classList.add('visible');
+              setTimeout(() => {
+                messageCard.classList.add('visible');
+                setTimeout(() => restartBtn.classList.add('visible'), 800);
+              }, 600);
+            }, 800);
+          }, 1300);
+
+        }, 700);
+      }, 600);
+    }, 1700);
+  }
+
+  function flashLamp() {
+    const head = document.querySelector('.lamp-head');
+    head.style.transition = 'none';
+    head.style.boxShadow = '0 0 40px #f5c84299';
+    setTimeout(() => { head.style.transition = ''; }, 80);
+  }
+
+  function switchToSleepFace() {
+    document.getElementById('eyesAwake').style.transition = 'opacity 0.4s';
+    document.getElementById('eyesSleep').style.transition = 'opacity 0.4s';
+    document.getElementById('mouthAwake').style.transition = 'opacity 0.4s';
+    document.getElementById('mouthSleep').style.transition = 'opacity 0.4s';
+
+    document.getElementById('eyesAwake').setAttribute('opacity', '0');
+    document.getElementById('eyesSleep').setAttribute('opacity', '1');
+    document.getElementById('mouthAwake').setAttribute('opacity', '0');
+    document.getElementById('mouthSleep').setAttribute('opacity', '1');
+  }
+
+  function restart() {
+    location.reload();
+  }
+</script>
+</body>
+</html>
